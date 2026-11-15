@@ -9,7 +9,7 @@ import threading
 import unittest
 from unittest import mock
 
-BASE = pathlib.Path(__file__).resolve().parents[1] / "services/osint-forensics"
+BASE = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE))
 spec = importlib.util.spec_from_file_location("argus_http", BASE / "http_server.py")
 service = importlib.util.module_from_spec(spec)
