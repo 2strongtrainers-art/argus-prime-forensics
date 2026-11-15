@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-MODULE = Path(__file__).resolve().parents[1] / "services/osint-forensics/analyze.py"
+MODULE = Path(__file__).resolve().parents[1] / "analyze.py"
 SPEC = importlib.util.spec_from_file_location("argus_image_triage", MODULE)
 triage = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(triage)
