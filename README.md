@@ -24,3 +24,12 @@ The Worker returns `/health` with `enabled:false` until its distinct encrypted s
 For a secure deployment and test sequence, see [the Cloudflare deployment runbook](CLOUDFLARE_DEPLOYMENT.md).
 
 The original source of truth remains [Nicholas-AI-OS](https://github.com/2strongtrainers-art/Nicholas-AI-OS/tree/main/services/osint-forensics). This copy is a distinct repository and needs explicit updates when the source changes.
+
+## Release verification
+
+Cloudflare's Git integration builds this standalone repository from `main`.
+A successful GitHub CI run or `wrangler deploy --dry-run` is not proof of a live
+Cloudflare Container. Validate the actual Cloudflare build, then check the new
+Worker's `GET /health`, authentication boundary and a synthetic SHA-256
+round-trip before enabling real evidence. Do not transmit secrets in GitHub
+Actions or commit history.
