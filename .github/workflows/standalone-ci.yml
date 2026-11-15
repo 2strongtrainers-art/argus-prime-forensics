@@ -1,0 +1,49 @@
+name: ARGUS standalone forensic validation
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Offline synthetic parser and HTTP tests
+        run: python -m unittest discover -s tests -p 'test_osint*.py' -v
+
+  offline-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build and check binaries without private evidence
+        run: |
+          docker build --pull -f Dockerfile -t argus-forensics:ci .
+          docker run --rm --network none --read-only --cap-drop ALL argus-forensics:ci exiftool -ver
+          docker run --rm --network none --read-only --cap-drop ALL argus-forensics:ci c2patool --version
+      - name: Synthetic HTTP smoke with network denied
+        run: |
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --pids-limit 64 --memory 256m \
+            --tmpfs /tmp:rw,nosuid,nodev,size=32m \
+            argus-forensics:ci python /opt/argus/http_server.py --self-test
+
+  cloudflare-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install pinned Wrangler and verify standalone config
+        run: |
+          npm install --no-audit --no-fund
+          node --check edge/index.js
+          npx wrangler deploy --dry-run
